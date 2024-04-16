@@ -28,7 +28,7 @@ contract BinTestUtils {
         vault.registerPoolManager(address(poolManager));
 
         positionManager = new BinFungiblePositionManager(vault, poolManager, address(0));
-        swapRouter = new BinSwapRouter(poolManager, vault, address(0));
+        swapRouter = new BinSwapRouter(vault, poolManager, address(0));
 
         MockERC20 token0 = new MockERC20("token0", "T0", 18);
         MockERC20 token1 = new MockERC20("token1", "T1", 18);
