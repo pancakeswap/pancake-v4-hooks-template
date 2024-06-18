@@ -25,7 +25,7 @@ contract BinTestUtils {
     function deployContractsWithTokens() internal returns (Currency, Currency) {
         vault = new Vault();
         poolManager = new BinPoolManager(vault, 500000);
-        vault.registerPoolManager(address(poolManager));
+        vault.registerApp(address(poolManager));
 
         positionManager = new BinFungiblePositionManager(vault, poolManager, address(0));
         swapRouter = new BinSwapRouter(vault, poolManager, address(0));

@@ -4,3 +4,4 @@ out = 'foundry-out'
 solc_version = '0.8.24'
 libs = ["lib"]
 evm_version = 'cancun'
+via_ir = true
