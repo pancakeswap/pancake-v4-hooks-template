@@ -2,7 +2,8 @@
 pragma solidity ^0.8.24;
 
 import {PoolKey} from "@pancakeswap/v4-core/src/types/PoolKey.sol";
-import {BalanceDelta} from "@pancakeswap/v4-core/src/types/BalanceDelta.sol";
+import {BalanceDelta, BalanceDeltaLibrary} from "@pancakeswap/v4-core/src/types/BalanceDelta.sol";
+import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "@pancakeswap/v4-core/src/types/BeforeSwapDelta.sol";
 import {PoolId, PoolIdLibrary} from "@pancakeswap/v4-core/src/types/PoolId.sol";
 import {ICLPoolManager} from "@pancakeswap/v4-core/src/pool-cl/interfaces/ICLPoolManager.sol";
 import {CLBaseHook} from "./CLBaseHook.sol";
@@ -32,7 +33,10 @@ contract CLCounterHook is CLBaseHook {
                 afterSwap: true,
                 beforeDonate: false,
                 afterDonate: false,
-                noOp: false
+                beforeSwapReturnsDelta: false,
+                afterSwapReturnsDelta: false,
+                afterAddLiquidityReturnsDelta: false,
+                afterRemoveLiquidityReturnsDelta: false
             })
         );
     }
@@ -53,28 +57,28 @@ contract CLCounterHook is CLBaseHook {
         ICLPoolManager.ModifyLiquidityParams calldata,
         BalanceDelta,
         bytes calldata
-    ) external override poolManagerOnly returns (bytes4) {
+    ) external override poolManagerOnly returns (bytes4, BalanceDelta) {
         afterAddLiquidityCount[key.toId()]++;
-        return this.afterAddLiquidity.selector;
+        return (this.afterAddLiquidity.selector, BalanceDeltaLibrary.ZERO_DELTA);
     }
 
     function beforeSwap(address, PoolKey calldata key, ICLPoolManager.SwapParams calldata, bytes calldata)
         external
         override
         poolManagerOnly
-        returns (bytes4)
+        returns (bytes4, BeforeSwapDelta, uint24)
     {
         beforeSwapCount[key.toId()]++;
-        return this.beforeSwap.selector;
+        return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
     }
 
     function afterSwap(address, PoolKey calldata key, ICLPoolManager.SwapParams calldata, BalanceDelta, bytes calldata)
         external
         override
         poolManagerOnly
-        returns (bytes4)
+        returns (bytes4, int128)
     {
         afterSwapCount[key.toId()]++;
-        return this.afterSwap.selector;
+        return (this.afterSwap.selector, 0);
     }
 }
