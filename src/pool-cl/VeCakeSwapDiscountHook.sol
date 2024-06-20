@@ -13,8 +13,12 @@ interface IVeCake {
 }
 
 /// @notice VeCakeSwapDiscountHook provides 50% swap fee discount for veCake holder
-/// Idea: 1. PancakeSwap has veCake (vote-escrowed Cake), user obtain veCake by locking cake
-///       2. If the swapper holds veCake, provide 50% swap fee discount
+/// Idea: 
+///   1. PancakeSwap has veCake (vote-escrowed Cake), user obtain veCake by locking cake
+///   2. If the swapper holds veCake, provide 50% swap fee discount
+/// Implementation:
+///   1. When pool is initialized, at `afterInitialize` we store what is the intended swap fee for the pool
+//    2. During `beforeSwap` callback, the hook checks if users is veCake holder and provide discount accordingly
 contract VeCakeSwapDiscountHook is CLBaseHook {
     using PoolIdLibrary for PoolKey;
     using LPFeeLibrary for uint24;
@@ -47,18 +51,27 @@ contract VeCakeSwapDiscountHook is CLBaseHook {
         );
     }
 
-    /// @dev Get the intended lpFee for this pool and store in mapping
+    /// @notice The hook called after the state of a pool is initialized
+    /// @return bytes4 The function selector for the hook
     function afterInitialize(address, PoolKey calldata key, uint160, int24, bytes calldata hookData)
         external
         override
         returns (bytes4)
     {
+        // Get the intended lpFee for this pool and store in mapping
         uint24 lpFee = abi.decode(hookData, (uint24));
         poolIdToLpFee[key.toId()] = lpFee;
 
         return this.afterInitialize.selector;
     }
 
+    /// @notice The hook called before a swap
+    /// @return bytes4 The function selector for the hook
+    /// @return BeforeSwapDelta The hook's delta in specified and unspecified currencies.
+    /// @return uint24 Optionally override the lp fee, only used if three conditions are met:
+    ///     1) the Pool has a dynamic fee,
+    ///     2) the value's override flag is set to 1 i.e. vaule & OVERRIDE_FEE_FLAG = 0x400000 != 0
+    ///     3) the value is less than or equal to the maximum fee (1 million)
     function beforeSwap(address, PoolKey calldata key, ICLPoolManager.SwapParams calldata, bytes calldata)
         external
         override

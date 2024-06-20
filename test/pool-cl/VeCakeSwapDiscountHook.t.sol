@@ -38,7 +38,7 @@ contract VeCakeSwapDiscountHookTest is Test, CLTestUtils {
             parameters: bytes32(uint256(hook.getHooksRegistrationBitmap())).setTickSpacing(10)
         });
 
-        // initialize pool at 1:1 price point and set 3000 as initial lp fee, lpFee is stored in the hook
+        // initialize pool at 1:1 price point and set 3000 (0.3%) as lp fee, lpFee is stored in the hook
         poolManager.initialize(key, Constants.SQRT_RATIO_1_1, abi.encode(uint24(3000)));
 
         // add liquidity so that swap can happen

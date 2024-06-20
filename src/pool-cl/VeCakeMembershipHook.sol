@@ -31,7 +31,6 @@ contract VeCakeMembershipHook is CLBaseHook {
 
     constructor(ICLPoolManager _poolManager, address _veCake) CLBaseHook(_poolManager) {
         veCake = IVeCake(_veCake);
-        promoEndDate = block.timestamp + 1 hours;
     }
 
     function getHooksRegistrationBitmap() external pure override returns (uint16) {
@@ -64,6 +63,7 @@ contract VeCakeMembershipHook is CLBaseHook {
         (uint24 lpFee) = abi.decode(hookData, (uint24));
         poolIdToLpFee[key.toId()] = lpFee;
 
+        promoEndDate = block.timestamp + 1 hours;
         return this.afterInitialize.selector;
     }
 
