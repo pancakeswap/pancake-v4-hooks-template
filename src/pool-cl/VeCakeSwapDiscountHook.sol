@@ -12,12 +12,12 @@ interface IVeCake {
     function balanceOf(address account) external view returns (uint256 balance);
 }
 
-/// @notice VeCakeSwapDiscountHook allows veCake to get 50% off swap fee
+/// @notice VeCakeSwapDiscountHook provides 50% swap fee discount for veCake holder
+/// Idea: 1. PancakeSwap has veCake (vote-escrowed Cake), user obtain veCake by locking cake
+///       2. If the swapper holds veCake, provide 50% swap fee discount
 contract VeCakeSwapDiscountHook is CLBaseHook {
     using PoolIdLibrary for PoolKey;
     using LPFeeLibrary for uint24;
-
-    error PoolNotOpenForPublicTradeYet();
 
     IVeCake public veCake;
     mapping(PoolId => uint24) public poolIdToLpFee;

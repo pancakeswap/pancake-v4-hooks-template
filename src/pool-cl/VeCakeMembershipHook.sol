@@ -93,7 +93,7 @@ contract VeCakeMembershipHook is CLBaseHook {
             return (this.afterSwap.selector, 0);
         }
 
-        /// @dev this is POC code, do not use for production!! 
+        /// @dev this is POC code, do not use for production, this is only for POC.
         /// Assumption: currency1 is subsidised currency and if veCake user swap token0 for token1, give 5% more token1.
         if (param.zeroForOne && veCake.balanceOf(tx.origin) >= 1 ether) {
 

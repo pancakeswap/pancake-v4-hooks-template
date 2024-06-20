@@ -14,6 +14,8 @@ interface IVeCake {
 }
 
 /// @notice VeCakeWhitelistHook allows only veCake holder to trade with the pool within the first hour
+/// Idea: 1. A PCS partner protocol launch a new protocol by adding liquidity XX-ETH 
+///       2. Only veCake holder can buy the token in the first hour and public access will be granted after.  
 contract VeCakeWhitelistHook is CLBaseHook {
     using PoolIdLibrary for PoolKey;
 
