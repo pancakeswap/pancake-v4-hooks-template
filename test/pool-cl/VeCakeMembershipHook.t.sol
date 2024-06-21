@@ -57,7 +57,7 @@ contract VeCakeMembershipHookTest is Test, CLTestUtils {
         // mint alice token for trade later
         MockERC20(Currency.unwrap(currency0)).mint(address(alice), 100 ether);
 
-        // mint currency 1 for hook to give out 
+        // mint currency 1 for hook to give out
         MockERC20(Currency.unwrap(currency1)).mint(address(hook), 100 ether);
     }
 

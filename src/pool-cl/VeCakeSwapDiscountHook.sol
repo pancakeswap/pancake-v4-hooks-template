@@ -13,7 +13,7 @@ interface IVeCake {
 }
 
 /// @notice VeCakeSwapDiscountHook provides 50% swap fee discount for veCake holder
-/// Idea: 
+/// Idea:
 ///   1. PancakeSwap has veCake (vote-escrowed Cake), user obtain veCake by locking cake
 ///   2. If the swapper holds veCake, provide 50% swap fee discount
 /// Implementation:

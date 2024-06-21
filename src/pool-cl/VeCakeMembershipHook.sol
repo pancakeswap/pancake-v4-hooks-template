@@ -45,7 +45,7 @@ contract VeCakeMembershipHook is CLBaseHook {
                 beforeDonate: false,
                 afterDonate: false,
                 beforeSwapReturnsDelta: false,
-                afterSwapReturnsDelta: true, 
+                afterSwapReturnsDelta: true,
                 afterAddLiquidityReturnsDelta: false,
                 afterRemoveLiquidityReturnsDelta: false
             })
@@ -85,7 +85,6 @@ contract VeCakeMembershipHook is CLBaseHook {
         BalanceDelta delta,
         bytes calldata
     ) external override returns (bytes4, int128) {
-
         // return early if promo has ended
         if (block.timestamp > promoEndDate) {
             return (this.afterSwap.selector, 0);
@@ -93,9 +92,11 @@ contract VeCakeMembershipHook is CLBaseHook {
 
         /// @dev this is POC code, do not use for production, this is only for POC.
         /// Assumption: currency1 is subsidised currency and if veCake user swap token0 for token1, give 5% more token1.
-        if (param.zeroForOne && veCake.balanceOf(tx.origin) >= 1 ether) {
-
-            // delta.amount1 is positive as zeroForOne 
+        /// zeroForOne: swap token0 for token1
+        /// amountSpecified < 0: indicate exactIn token0 for token1. so unspecified token is token1
+        /// veCake.balanceOf(tx.origin) >= 1 ether: only veCake holder
+        if (param.zeroForOne && param.amountSpecified < 0 && veCake.balanceOf(tx.origin) >= 1 ether) {
+            // delta.amount1 is positive as zeroForOne
             int128 extraToken = delta.amount1() * 5 / 100;
 
             // settle and return negative value to indicate that hook is giving token
