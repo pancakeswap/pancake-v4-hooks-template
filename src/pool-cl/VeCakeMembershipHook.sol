@@ -23,8 +23,6 @@ contract VeCakeMembershipHook is CLBaseHook {
     using PoolIdLibrary for PoolKey;
     using LPFeeLibrary for uint24;
 
-    error PoolNotOpenForPublicTradeYet();
-
     IVeCake public veCake;
     uint256 public promoEndDate;
     mapping(PoolId => uint24) public poolIdToLpFee;
