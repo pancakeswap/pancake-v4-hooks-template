@@ -6,14 +6,14 @@ import {Test} from "forge-std/Test.sol";
 import {Constants} from "@pancakeswap/v4-core/test/pool-cl/helpers/Constants.sol";
 import {Currency} from "@pancakeswap/v4-core/src/types/Currency.sol";
 import {PoolKey} from "@pancakeswap/v4-core/src/types/PoolKey.sol";
-import {LPFeeLibrary} from "@pancakeswap/v4-core/src/libraries/LPFeeLibrary.sol";
 import {CLPoolParametersHelper} from "@pancakeswap/v4-core/src/pool-cl/libraries/CLPoolParametersHelper.sol";
-import {VeCakeMembershipHook} from "../../src/pool-cl/VeCakeMembershipHook.sol";
 import {CLTestUtils} from "./utils/CLTestUtils.sol";
+import {CLPoolParametersHelper} from "@pancakeswap/v4-core/src/pool-cl/libraries/CLPoolParametersHelper.sol";
 import {PoolIdLibrary} from "@pancakeswap/v4-core/src/types/PoolId.sol";
-import {ICLSwapRouterBase} from "pancake-v4-periphery/src/pool-cl/interfaces/ICLSwapRouterBase.sol";
+import {ICLSwapRouterBase} from "@pancakeswap/v4-periphery/src/pool-cl/interfaces/ICLSwapRouterBase.sol";
 
-import {console2} from "forge-std/console2.sol";
+import {VeCakeMembershipHook} from "../../src/pool-cl/VeCakeMembershipHook.sol";
+import {LPFeeLibrary} from "@pancakeswap/v4-core/src/libraries/LPFeeLibrary.sol";
 
 contract VeCakeMembershipHookTest is Test, CLTestUtils {
     using PoolIdLibrary for PoolKey;
@@ -80,14 +80,14 @@ contract VeCakeMembershipHookTest is Test, CLTestUtils {
         assertLe(amtOut, 0.997 ether);
     }
 
-    function testVeCakeHolderX() public {
+    function testVeCakeHolder() public {
         // mint alice veCake
         veCake.mint(address(alice), 1 ether);
 
         uint256 amtOut = _swap();
 
-        // amount out is more than amtIn to indicate hook has given some extra tokenOut
-        assertGt(amtOut, 1 ether);
+        // amount out is almost 1.05 due to the 5% subsidy from hook and 0% swap fee
+        assertGt(amtOut, 1.04 ether);
     }
 
     function _swap() internal returns (uint256 amtOut) {
