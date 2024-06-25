@@ -17,24 +17,24 @@ contract CLCounterHookTest is Test, CLTestUtils {
     using PoolIdLibrary for PoolKey;
     using CLPoolParametersHelper for bytes32;
 
-    CLCounterHook counterHook;
+    CLCounterHook hook;
     Currency currency0;
     Currency currency1;
     PoolKey key;
 
     function setUp() public {
         (currency0, currency1) = deployContractsWithTokens();
-        counterHook = new CLCounterHook(poolManager);
+        hook = new CLCounterHook(poolManager);
 
         // create the pool key
         key = PoolKey({
             currency0: currency0,
             currency1: currency1,
-            hooks: counterHook,
+            hooks: hook,
             poolManager: poolManager,
             fee: uint24(3000), // 0.3% fee
             // tickSpacing: 10
-            parameters: bytes32(uint256(counterHook.getHooksRegistrationBitmap())).setTickSpacing(10)
+            parameters: bytes32(uint256(hook.getHooksRegistrationBitmap())).setTickSpacing(10)
         });
 
         // initialize pool at 1:1 price point (assume stablecoin pair)
@@ -42,15 +42,15 @@ contract CLCounterHookTest is Test, CLTestUtils {
     }
 
     function testLiquidityCallback() public {
-        assertEq(counterHook.beforeAddLiquidityCount(key.toId()), 0);
-        assertEq(counterHook.afterAddLiquidityCount(key.toId()), 0);
+        assertEq(hook.beforeAddLiquidityCount(key.toId()), 0);
+        assertEq(hook.afterAddLiquidityCount(key.toId()), 0);
 
         MockERC20(Currency.unwrap(currency0)).mint(address(this), 1 ether);
         MockERC20(Currency.unwrap(currency1)).mint(address(this), 1 ether);
         addLiquidity(key, 1 ether, 1 ether, -60, 60);
 
-        assertEq(counterHook.beforeAddLiquidityCount(key.toId()), 1);
-        assertEq(counterHook.afterAddLiquidityCount(key.toId()), 1);
+        assertEq(hook.beforeAddLiquidityCount(key.toId()), 1);
+        assertEq(hook.afterAddLiquidityCount(key.toId()), 1);
     }
 
     function testSwapCallback() public {
@@ -58,8 +58,8 @@ contract CLCounterHookTest is Test, CLTestUtils {
         MockERC20(Currency.unwrap(currency1)).mint(address(this), 1 ether);
         addLiquidity(key, 1 ether, 1 ether, -60, 60);
 
-        assertEq(counterHook.beforeSwapCount(key.toId()), 0);
-        assertEq(counterHook.afterSwapCount(key.toId()), 0);
+        assertEq(hook.beforeSwapCount(key.toId()), 0);
+        assertEq(hook.afterSwapCount(key.toId()), 0);
 
         MockERC20(Currency.unwrap(currency0)).mint(address(this), 0.1 ether);
         swapRouter.exactInputSingle(
@@ -75,7 +75,7 @@ contract CLCounterHookTest is Test, CLTestUtils {
             block.timestamp
         );
 
-        assertEq(counterHook.beforeSwapCount(key.toId()), 1);
-        assertEq(counterHook.afterSwapCount(key.toId()), 1);
+        assertEq(hook.beforeSwapCount(key.toId()), 1);
+        assertEq(hook.afterSwapCount(key.toId()), 1);
     }
 }
