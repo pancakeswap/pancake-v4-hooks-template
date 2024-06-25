@@ -17,8 +17,8 @@ interface IVeCake {
 }
 
 /// @notice VeCakeMembershipHook provides the following features for veCake holders:
-///     1. veCake holder will get 5% more tokenOut subsidised by hook
-///     2. veCake holder get 100% off swap fee for the first hour
+///     1. veCake holder will get 0% swap fee for the first hour
+///     2. veCake holder will get 5% more tokenOut when swap exactIn token0 for token1 subsidised by hook
 contract VeCakeMembershipHook is CLBaseHook {
     using CurrencySettlement for Currency;
     using PoolIdLibrary for PoolKey;
@@ -66,6 +66,7 @@ contract VeCakeMembershipHook is CLBaseHook {
 
     function beforeSwap(address, PoolKey calldata key, ICLPoolManager.SwapParams calldata, bytes calldata)
         external
+        view
         override
         poolManagerOnly
         returns (bytes4, BeforeSwapDelta, uint24)
@@ -85,7 +86,7 @@ contract VeCakeMembershipHook is CLBaseHook {
 
     function afterSwap(
         address,
-        PoolKey calldata poolKey,
+        PoolKey calldata key,
         ICLPoolManager.SwapParams calldata param,
         BalanceDelta delta,
         bytes calldata
@@ -95,12 +96,13 @@ contract VeCakeMembershipHook is CLBaseHook {
             return (this.afterSwap.selector, 0);
         }
 
+        // param.amountSpecified < 0 implies exactIn
         if (param.zeroForOne && param.amountSpecified < 0 && veCake.balanceOf(tx.origin) >= 1 ether) {
             // delta.amount1 is positive as zeroForOne
             int128 extraToken = delta.amount1() * 5 / 100;
 
             // settle and return negative value to indicate that hook is giving token
-            poolKey.currency1.settle(vault, address(this), uint128(extraToken), false);
+            key.currency1.settle(vault, address(this), uint128(extraToken), false);
             return (this.afterSwap.selector, -extraToken);
         }
 
