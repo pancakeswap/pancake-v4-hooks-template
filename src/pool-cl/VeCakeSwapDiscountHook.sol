@@ -56,6 +56,7 @@ contract VeCakeSwapDiscountHook is CLBaseHook {
     function afterInitialize(address, PoolKey calldata key, uint160, int24, bytes calldata hookData)
         external
         override
+        poolManagerOnly
         returns (bytes4)
     {
         // Get the intended lpFee for this pool and store in mapping
