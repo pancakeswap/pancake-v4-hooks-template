@@ -1,15 +1,6 @@
 [submodule "lib/forge-std"]
 	path = lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
-[submodule "lib/pancake-v4-core"]
-	path = lib/pancake-v4-core
-	url = https://github.com/pancakeswap/pancake-v4-core
 [submodule "lib/pancake-v4-periphery"]
 	path = lib/pancake-v4-periphery
 	url = https://github.com/pancakeswap/pancake-v4-periphery
-[submodule "lib/openzeppelin-contracts"]
-	path = lib/openzeppelin-contracts
-	url = https://github.com/OpenZeppelin/openzeppelin-contracts
-[submodule "lib/solmate"]
-	path = lib/solmate
-	url = https://github.com/transmissions11/solmate
