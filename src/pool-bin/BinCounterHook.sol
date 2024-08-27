@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {PoolKey} from "@pancakeswap/v4-core/src/types/PoolKey.sol";
-import {BalanceDelta, BalanceDeltaLibrary} from "@pancakeswap/v4-core/src/types/BalanceDelta.sol";
-import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "@pancakeswap/v4-core/src/types/BeforeSwapDelta.sol";
-import {PoolId, PoolIdLibrary} from "@pancakeswap/v4-core/src/types/PoolId.sol";
-import {IBinPoolManager} from "@pancakeswap/v4-core/src/pool-bin/interfaces/IBinPoolManager.sol";
+import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
+import {BalanceDelta, BalanceDeltaLibrary} from "pancake-v4-core/src/types/BalanceDelta.sol";
+import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "pancake-v4-core/src/types/BeforeSwapDelta.sol";
+import {PoolId, PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
+import {IBinPoolManager} from "pancake-v4-core/src/pool-bin/interfaces/IBinPoolManager.sol";
 import {BinBaseHook} from "./BinBaseHook.sol";
 
 /// @notice BinCounterHook is a contract that counts the number of times a hook is called
@@ -45,10 +45,10 @@ contract BinCounterHook is BinBaseHook {
         external
         override
         poolManagerOnly
-        returns (bytes4)
+        returns (bytes4, uint24)
     {
         beforeMintCount[key.toId()]++;
-        return this.beforeMint.selector;
+        return (this.beforeMint.selector, 0);
     }
 
     function afterMint(address, PoolKey calldata key, IBinPoolManager.MintParams calldata, BalanceDelta, bytes calldata)
