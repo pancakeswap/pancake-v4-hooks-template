@@ -1,17 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-import {MockERC20} from "solmate/test/utils/mocks/MockERC20.sol";
+import {MockERC20} from "solmate/src/test/utils/mocks/MockERC20.sol";
 import {Test} from "forge-std/Test.sol";
-import {Constants} from "@pancakeswap/v4-core/test/pool-cl/helpers/Constants.sol";
-import {Currency} from "@pancakeswap/v4-core/src/types/Currency.sol";
-import {PoolKey} from "@pancakeswap/v4-core/src/types/PoolKey.sol";
-import {LPFeeLibrary} from "@pancakeswap/v4-core/src/libraries/LPFeeLibrary.sol";
-import {CLPoolParametersHelper} from "@pancakeswap/v4-core/src/pool-cl/libraries/CLPoolParametersHelper.sol";
+import {Constants} from "pancake-v4-core/test/pool-cl/helpers/Constants.sol";
+import {Currency} from "pancake-v4-core/src/types/Currency.sol";
+import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
+import {LPFeeLibrary} from "pancake-v4-core/src/libraries/LPFeeLibrary.sol";
+import {CLPoolParametersHelper} from "pancake-v4-core/src/pool-cl/libraries/CLPoolParametersHelper.sol";
 import {VeCakeSwapDiscountHook} from "../../src/pool-cl/VeCakeSwapDiscountHook.sol";
 import {CLTestUtils} from "./utils/CLTestUtils.sol";
-import {PoolIdLibrary} from "@pancakeswap/v4-core/src/types/PoolId.sol";
-import {ICLSwapRouterBase} from "pancake-v4-periphery/src/pool-cl/interfaces/ICLSwapRouterBase.sol";
+import {PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
+import {ICLRouterBase} from "pancake-v4-periphery/src/pool-cl/interfaces/ICLRouterBase.sol";
+
+import {console2} from "forge-std/console2.sol";
 
 contract VeCakeSwapDiscountHookTest is Test, CLTestUtils {
     using PoolIdLibrary for PoolKey;
@@ -47,10 +49,8 @@ contract VeCakeSwapDiscountHookTest is Test, CLTestUtils {
         addLiquidity(key, 100 ether, 100 ether, -60, 60);
 
         // approve from alice for swap in the test cases below
-        vm.startPrank(alice);
-        MockERC20(Currency.unwrap(currency0)).approve(address(swapRouter), type(uint256).max);
-        MockERC20(Currency.unwrap(currency1)).approve(address(swapRouter), type(uint256).max);
-        vm.stopPrank();
+        permit2Approve(alice, currency0, address(universalRouter));
+        permit2Approve(alice, currency1, address(universalRouter));
 
         // mint alice token for trade later
         MockERC20(Currency.unwrap(currency0)).mint(address(alice), 100 ether);
@@ -75,20 +75,22 @@ contract VeCakeSwapDiscountHookTest is Test, CLTestUtils {
     }
 
     function _swap() internal returns (uint256 amtOut) {
+        uint256 amt1BalBefore = MockERC20(Currency.unwrap(currency1)).balanceOf(address(alice));
+
         // set alice as tx.origin
         vm.prank(address(alice), address(alice));
-
-        amtOut = swapRouter.exactInputSingle(
-            ICLSwapRouterBase.V4CLExactInputSingleParams({
+        exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
                 poolKey: key,
                 zeroForOne: true,
-                recipient: address(alice),
                 amountIn: 1 ether,
                 amountOutMinimum: 0,
                 sqrtPriceLimitX96: 0,
                 hookData: new bytes(0)
-            }),
-            block.timestamp
+            })
         );
+
+        uint256 amt1BalAfter = MockERC20(Currency.unwrap(currency1)).balanceOf(address(alice));
+        amtOut = amt1BalAfter - amt1BalBefore;
     }
 }
