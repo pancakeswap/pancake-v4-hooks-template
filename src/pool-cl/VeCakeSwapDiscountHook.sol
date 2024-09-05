@@ -83,7 +83,7 @@ contract VeCakeSwapDiscountHook is CLBaseHook {
 
         /// If veCake holder, lpFee is half
         if (veCake.balanceOf(tx.origin) >= 1 ether) {
-            lpFee = poolIdToLpFee[key.toId()] / 2;
+            lpFee = lpFee / 2; 
         }
 
         return (this.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, lpFee | LPFeeLibrary.OVERRIDE_FEE_FLAG);
