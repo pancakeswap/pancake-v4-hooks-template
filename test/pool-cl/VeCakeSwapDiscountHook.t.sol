@@ -46,7 +46,7 @@ contract VeCakeSwapDiscountHookTest is Test, CLTestUtils {
         // add liquidity so that swap can happen
         MockERC20(Currency.unwrap(currency0)).mint(address(this), 100 ether);
         MockERC20(Currency.unwrap(currency1)).mint(address(this), 100 ether);
-        addLiquidity(key, 100 ether, 100 ether, -60, 60);
+        addLiquidity(key, 100 ether, 100 ether, -60, 60, address(this));
 
         // approve from alice for swap in the test cases below
         permit2Approve(alice, currency0, address(universalRouter));
