@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-import {MockERC20} from "solmate/test/utils/mocks/MockERC20.sol";
+import {MockERC20} from "solmate/src/test/utils/mocks/MockERC20.sol";
 import {Test} from "forge-std/Test.sol";
-import {Constants} from "@pancakeswap/v4-core/test/pool-cl/helpers/Constants.sol";
-import {Currency} from "@pancakeswap/v4-core/src/types/Currency.sol";
-import {PoolKey} from "@pancakeswap/v4-core/src/types/PoolKey.sol";
-import {CLPoolParametersHelper} from "@pancakeswap/v4-core/src/pool-cl/libraries/CLPoolParametersHelper.sol";
+import {Constants} from "pancake-v4-core/test/pool-cl/helpers/Constants.sol";
+import {Currency} from "pancake-v4-core/src/types/Currency.sol";
+import {PoolKey} from "pancake-v4-core/src/types/PoolKey.sol";
+import {CLPoolParametersHelper} from "pancake-v4-core/src/pool-cl/libraries/CLPoolParametersHelper.sol";
 import {CLCounterHook} from "../../src/pool-cl/CLCounterHook.sol";
 import {CLTestUtils} from "./utils/CLTestUtils.sol";
-import {CLPoolParametersHelper} from "@pancakeswap/v4-core/src/pool-cl/libraries/CLPoolParametersHelper.sol";
-import {PoolIdLibrary} from "@pancakeswap/v4-core/src/types/PoolId.sol";
-import {ICLSwapRouterBase} from "@pancakeswap/v4-periphery/src/pool-cl/interfaces/ICLSwapRouterBase.sol";
+import {CLPoolParametersHelper} from "pancake-v4-core/src/pool-cl/libraries/CLPoolParametersHelper.sol";
+import {PoolIdLibrary} from "pancake-v4-core/src/types/PoolId.sol";
+import {ICLRouterBase} from "pancake-v4-periphery/src/pool-cl/interfaces/ICLRouterBase.sol";
 
 contract CLCounterHookTest is Test, CLTestUtils {
     using PoolIdLibrary for PoolKey;
@@ -62,17 +62,15 @@ contract CLCounterHookTest is Test, CLTestUtils {
         assertEq(hook.afterSwapCount(key.toId()), 0);
 
         MockERC20(Currency.unwrap(currency0)).mint(address(this), 0.1 ether);
-        swapRouter.exactInputSingle(
-            ICLSwapRouterBase.V4CLExactInputSingleParams({
+        exactInputSingle(
+            ICLRouterBase.CLSwapExactInputSingleParams({
                 poolKey: key,
                 zeroForOne: true,
-                recipient: address(this),
                 amountIn: 0.1 ether,
                 amountOutMinimum: 0,
                 sqrtPriceLimitX96: 0,
                 hookData: new bytes(0)
-            }),
-            block.timestamp
+            })
         );
 
         assertEq(hook.beforeSwapCount(key.toId()), 1);
