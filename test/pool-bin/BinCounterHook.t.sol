@@ -46,7 +46,7 @@ contract BinCounterHookTest is Test, BinTestUtils {
 
         MockERC20(Currency.unwrap(currency0)).mint(address(this), 1 ether);
         MockERC20(Currency.unwrap(currency1)).mint(address(this), 1 ether);
-        addLiquidity(key, 1 ether, 1 ether, ACTIVE_ID, 3);
+        addLiquidity(key, 1 ether, 1 ether, ACTIVE_ID, 3, address(this));
 
         assertEq(counterHook.beforeMintCount(key.toId()), 1);
         assertEq(counterHook.afterMintCount(key.toId()), 1);
@@ -55,7 +55,7 @@ contract BinCounterHookTest is Test, BinTestUtils {
     function testSwapCallback() public {
         MockERC20(Currency.unwrap(currency0)).mint(address(this), 1 ether);
         MockERC20(Currency.unwrap(currency1)).mint(address(this), 1 ether);
-        addLiquidity(key, 1 ether, 1 ether, ACTIVE_ID, 3);
+        addLiquidity(key, 1 ether, 1 ether, ACTIVE_ID, 3, address(this));
 
         assertEq(counterHook.beforeSwapCount(key.toId()), 0);
         assertEq(counterHook.afterSwapCount(key.toId()), 0);
