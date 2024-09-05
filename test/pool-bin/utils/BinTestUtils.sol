@@ -80,7 +80,8 @@ contract BinTestUtils is DeployPermit2 {
         uint128 amountX,
         uint128 amountY,
         uint24 currentActiveId,
-        uint24 numOfBins
+        uint24 numOfBins,
+        address recipient
     ) internal {
         uint24[] memory binIds = new uint24[](numOfBins);
         uint24 startId = currentActiveId - (numOfBins / 2);
@@ -116,7 +117,7 @@ contract BinTestUtils is DeployPermit2 {
             deltaIds: convertToRelative(binIds, currentActiveId),
             distributionX: distribX,
             distributionY: distribY,
-            to: address(this)
+            to: recipient
         });
 
         Plan memory planner = Planner.init().add(Actions.BIN_ADD_LIQUIDITY, abi.encode(params));
@@ -126,8 +127,22 @@ contract BinTestUtils is DeployPermit2 {
 
     function exactInputSingle(IBinRouterBase.BinSwapExactInputSingleParams memory params) internal {
         Plan memory plan = Planner.init().add(Actions.BIN_SWAP_EXACT_IN_SINGLE, abi.encode(params));
-        bytes memory data =
-            plan.finalizeSwap(params.poolKey.currency0, params.poolKey.currency1, ActionConstants.MSG_SENDER);
+        bytes memory data = params.swapForY
+            ? plan.finalizeSwap(params.poolKey.currency0, params.poolKey.currency1, ActionConstants.MSG_SENDER)
+            : plan.finalizeSwap(params.poolKey.currency1, params.poolKey.currency0, ActionConstants.MSG_SENDER);
+
+        bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V4_SWAP)));
+        bytes[] memory inputs = new bytes[](1);
+        inputs[0] = data;
+
+        universalRouter.execute(commands, inputs);
+    }
+
+    function exactOutputSingle(IBinRouterBase.BinSwapExactOutputSingleParams memory params) internal {
+        Plan memory plan = Planner.init().add(Actions.BIN_SWAP_EXACT_OUT_SINGLE, abi.encode(params));
+        bytes memory data = params.swapForY
+            ? plan.finalizeSwap(params.poolKey.currency0, params.poolKey.currency1, ActionConstants.MSG_SENDER)
+            : plan.finalizeSwap(params.poolKey.currency1, params.poolKey.currency0, ActionConstants.MSG_SENDER);
 
         bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V4_SWAP)));
         bytes[] memory inputs = new bytes[](1);

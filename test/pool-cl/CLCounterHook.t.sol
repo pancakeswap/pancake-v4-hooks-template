@@ -47,7 +47,7 @@ contract CLCounterHookTest is Test, CLTestUtils {
 
         MockERC20(Currency.unwrap(currency0)).mint(address(this), 1 ether);
         MockERC20(Currency.unwrap(currency1)).mint(address(this), 1 ether);
-        addLiquidity(key, 1 ether, 1 ether, -60, 60);
+        addLiquidity(key, 1 ether, 1 ether, -60, 60, address(this));
 
         assertEq(hook.beforeAddLiquidityCount(key.toId()), 1);
         assertEq(hook.afterAddLiquidityCount(key.toId()), 1);
@@ -56,7 +56,7 @@ contract CLCounterHookTest is Test, CLTestUtils {
     function testSwapCallback() public {
         MockERC20(Currency.unwrap(currency0)).mint(address(this), 1 ether);
         MockERC20(Currency.unwrap(currency1)).mint(address(this), 1 ether);
-        addLiquidity(key, 1 ether, 1 ether, -60, 60);
+        addLiquidity(key, 1 ether, 1 ether, -60, 60, address(this));
 
         assertEq(hook.beforeSwapCount(key.toId()), 0);
         assertEq(hook.afterSwapCount(key.toId()), 0);

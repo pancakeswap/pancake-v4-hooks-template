@@ -77,9 +77,16 @@ contract CLTestUtils is DeployPermit2 {
         return SortTokens.sort(token0, token1);
     }
 
-    function addLiquidity(PoolKey memory key, uint128 amount0Max, uint128 amount1Max, int24 tickLower, int24 tickUpper)
-        internal
-    {
+    function addLiquidity(
+        PoolKey memory key,
+        uint128 amount0Max,
+        uint128 amount1Max,
+        int24 tickLower,
+        int24 tickUpper,
+        address recipient
+    ) internal returns (uint256 tokenId) {
+        tokenId = positionManager.nextTokenId();
+
         (uint160 sqrtPriceX96,,,) = poolManager.getSlot0(key.toId());
         uint256 liquidity = LiquidityAmounts.getLiquidityForAmounts(
             sqrtPriceX96,
@@ -90,7 +97,33 @@ contract CLTestUtils is DeployPermit2 {
         );
         PositionConfig memory config = PositionConfig({poolKey: key, tickLower: tickLower, tickUpper: tickUpper});
         Plan memory planner = Planner.init().add(
-            Actions.CL_MINT_POSITION, abi.encode(config, liquidity, amount0Max, amount1Max, address(this), new bytes(0))
+            Actions.CL_MINT_POSITION, abi.encode(config, liquidity, amount0Max, amount1Max, recipient, new bytes(0))
+        );
+        bytes memory data = planner.finalizeModifyLiquidityWithClose(key);
+        positionManager.modifyLiquidities(data, block.timestamp);
+    }
+
+    function decreaseLiquidity(
+        uint256 tokenId,
+        PoolKey memory key,
+        uint128 amount0,
+        uint128 amount1,
+        int24 tickLower,
+        int24 tickUpper
+    ) internal {
+        (uint160 sqrtPriceX96,,,) = poolManager.getSlot0(key.toId());
+        uint256 liquidity = LiquidityAmounts.getLiquidityForAmounts(
+            sqrtPriceX96,
+            TickMath.getSqrtRatioAtTick(tickLower),
+            TickMath.getSqrtRatioAtTick(tickUpper),
+            amount0,
+            amount1
+        );
+        PositionConfig memory config = PositionConfig({poolKey: key, tickLower: tickLower, tickUpper: tickUpper});
+
+        // amount0Min and amount1Min is 0 as some hook takes a fee from here
+        Plan memory planner = Planner.init().add(
+            Actions.CL_DECREASE_LIQUIDITY, abi.encode(tokenId, config, liquidity, 0, 0, new bytes(0))
         );
         bytes memory data = planner.finalizeModifyLiquidityWithClose(key);
         positionManager.modifyLiquidities(data, block.timestamp);
@@ -98,8 +131,22 @@ contract CLTestUtils is DeployPermit2 {
 
     function exactInputSingle(ICLRouterBase.CLSwapExactInputSingleParams memory params) internal {
         Plan memory plan = Planner.init().add(Actions.CL_SWAP_EXACT_IN_SINGLE, abi.encode(params));
-        bytes memory data =
-            plan.finalizeSwap(params.poolKey.currency0, params.poolKey.currency1, ActionConstants.MSG_SENDER);
+        bytes memory data = params.zeroForOne
+            ? plan.finalizeSwap(params.poolKey.currency0, params.poolKey.currency1, ActionConstants.MSG_SENDER)
+            : plan.finalizeSwap(params.poolKey.currency1, params.poolKey.currency0, ActionConstants.MSG_SENDER);
+
+        bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V4_SWAP)));
+        bytes[] memory inputs = new bytes[](1);
+        inputs[0] = data;
+
+        universalRouter.execute(commands, inputs);
+    }
+
+    function exactOutputSingle(ICLRouterBase.CLSwapExactOutputSingleParams memory params) internal {
+        Plan memory plan = Planner.init().add(Actions.CL_SWAP_EXACT_OUT_SINGLE, abi.encode(params));
+        bytes memory data = params.zeroForOne
+            ? plan.finalizeSwap(params.poolKey.currency0, params.poolKey.currency1, ActionConstants.MSG_SENDER)
+            : plan.finalizeSwap(params.poolKey.currency1, params.poolKey.currency0, ActionConstants.MSG_SENDER);
 
         bytes memory commands = abi.encodePacked(bytes1(uint8(Commands.V4_SWAP)));
         bytes[] memory inputs = new bytes[](1);
