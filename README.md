@@ -1,16 +1,29 @@
-# Pancake v4 hooks template
+# Liquidity Pool Credit System
 
-[`Use this Template`](https://github.com/new?owner=pancakeswap&template_name=pancake-v4-hooks-template&template_owner=pancakeswap)
+## Overview
 
-## Prerequisite
+The Liquidity Pool Credit System is an innovative DeFi project that aims to incentivize long-term liquidity provision in decentralized exchanges. By leveraging the Brevis ZK-Coprocessor, we've created a secure and transparent system that rewards consistent liquidity providers with credit points, which can be used for various benefits within the ecosystem.
 
-1. Install foundry, see https://book.getfoundry.sh/getting-started/installation
+## Features
 
-## Running test
+- **Credit Point Accumulation**: Liquidity providers earn credit points based on the duration and consistency of their liquidity provision.
+- **Reward Tiers**: Different levels of rewards are unlocked as users accumulate more credit points.
+- **Reduced Transaction Fees**: Users can spend their credit points to enjoy lower transaction fees on the platform.
+- **Early Access**: High-credit users get priority access to new liquidity pools.
+- **Enhanced Governance Rights**: Credit points translate to increased voting power in platform governance decisions.
+- **Secure Tracking**: Utilizes Brevis ZK-Coprocessor for transparent and tamper-proof credit point calculation and management.
 
-1. Install dependencies with `forge install`
-2. Run test with `forge test`
+## Technical Stack
 
-## Description
+- Solidity Smart Contracts
+- Brevis ZK-Coprocessor
+- Foundry for testing and deployment
+- React.js for the frontend (optional)
 
-This repository contains example counter hook for both CL and Bin pool types. 
+## Getting Started
+
+### Prerequisites
+
+- Node.js v14+
+- Foundry
+
