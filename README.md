@@ -27,3 +27,5 @@ The Liquidity Pool Credit System is an innovative DeFi project that aims to ince
 - Node.js v14+
 - Foundry
 
+
+# In dieser Branch haben wir die Basis für die Credit System aufgesetzt.
