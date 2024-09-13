@@ -1,4 +1,4 @@
-name: test
+name: Solidity CI
 
 on:
   push:
@@ -11,9 +11,6 @@ env:
 
 jobs:
   check:
-    strategy:
-      fail-fast: true
-
     name: Foundry project
     runs-on: ubuntu-latest
     steps:
@@ -29,10 +26,35 @@ jobs:
       - name: Run Forge build
         run: |
           forge --version
-          forge build
+          forge build --sizes
         id: build
 
       - name: Run Forge tests
         run: |
           forge test -vvv
         id: test
+
+      - name: Run Forge coverage
+        run: |
+          forge coverage --report lcov
+        id: coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./lcov.info
+          fail_ci_if_error: true
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.3.0
+        id: slither
+        continue-on-error: true
+        with:
+          sarif: results.sarif
+          fail-on: none
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ${{ steps.slither.outputs.sarif }}
